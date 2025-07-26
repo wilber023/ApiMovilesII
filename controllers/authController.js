@@ -122,6 +122,25 @@
   };
 
   
+  exports.getAllUsers = async (req, res) => {
+    try {
+      const connection = await connectDB();
+      const [users] = await connection.execute('SELECT id, username, created_at FROM users');
+      res.status(200).json({
+        success: true,
+        count: users.length,
+        data: users
+      });
+    } catch (error) {
+      console.error('Error al obtener usuarios:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al obtener usuarios',
+        error: error.message
+      });
+    }
+  };
+
   exports.verifyUser = async (req, res) => {
     try {
   
