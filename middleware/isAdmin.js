@@ -1,4 +1,9 @@
-const jwt = require('jsonwebtoken');
+module.exports = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    return next();
+  }
+  return res.status(403).json({ success: false, message: 'Acceso solo para administradores' });
+};const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config/auth');
 const connectDB = require('../config/db');
 

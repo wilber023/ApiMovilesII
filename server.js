@@ -1,4 +1,4 @@
-  const express = require('express');
+const express = require('express');
   const cors = require('cors');
   const dotenv = require('dotenv');
   const connectDB = require('./config/db');
@@ -21,9 +21,11 @@
   
   const authRoutes = require('./routes/auth');
   const expenseRoutes = require('./routes/expenses');
+  const userRoutes = require('./routes/user');
  
   app.use('/api/auth', authRoutes);
   app.use('/api/expenses', expenseRoutes);
+  app.use('/api/users', userRoutes);
 
   
   app.get('/', (req, res) => {
