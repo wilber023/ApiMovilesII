@@ -1,11 +1,11 @@
-  const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs');
   const connectDB = require('../config/db');
   const { generateToken } = require('../config/auth');
 
   
   exports.register = async (req, res) => {
     try {
-      const { username, pin } = req.body;
+      const { username, pin, role } = req.body; // <-- agrega role
 
       if (!username || !pin) {
         return res.status(400).json({
@@ -35,10 +35,12 @@
   
       const pin_hash = await bcrypt.hash(pin, 10);
 
-  
+    // Usa el rol enviado o 'user' por defecto
+    const userRole = role === 'admin' ? 'admin' : 'user';
+
       const [result] = await connection.execute(
-        'INSERT INTO users (username, pin_hash) VALUES (?, ?)',
-        [username, pin_hash]
+        'INSERT INTO users (username, pin_hash, role) VALUES (?, ?, ?)',
+        [username, pin_hash, userRole]
       );
 
       
@@ -50,6 +52,7 @@
         data: {
           id: result.insertId,
           username,
+          role: userRole,
           token
         }
       });
