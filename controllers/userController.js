@@ -2,7 +2,11 @@ const connectDB = require('../config/db');
 
 // Listar todos los usuarios (solo admin)
 exports.getAllUsers = async (req, res) => {
+<<<<<<< HEAD
   try {
+=======
+  try { 
+>>>>>>> fd75930 (push notifications)
     const connection = await connectDB();
     const [users] = await connection.execute('SELECT id, username, role, push_token, created_at FROM users');
     res.status(200).json({ success: true, count: users.length, data: users });

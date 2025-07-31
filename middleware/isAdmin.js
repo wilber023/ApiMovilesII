@@ -1,9 +1,4 @@
-module.exports = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
-    return next();
-  }
-  return res.status(403).json({ success: false, message: 'Acceso solo para administradores' });
-};const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config/auth');
 const connectDB = require('../config/db');
 
@@ -29,4 +24,15 @@ const protect = async (req, res, next) => {
   return res.status(401).json({ success: false, message: 'No autorizado, no se proporcionó token' });
 };
 
-module.exports = { protect };
+const isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({
+      success: false,
+      message: 'Acceso denegado. Se requieren permisos de administrador.'
+    });
+  }
+};
+
+module.exports = { protect, isAdmin };
