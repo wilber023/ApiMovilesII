@@ -47,24 +47,45 @@ exports.crearGasto = async (req, res) => {
       fecha: fecha ? new Date(fecha) : new Date()
     });
 
-  
+    // Validar los datos del gasto
     const erroresValidacion = nuevoGasto.validar();
     if (erroresValidacion.length > 0) {
       return res.status(400).json({
         mensaje: erroresValidacion.join(', ')
       });
     }
- 
-    const usuario = await memoryStore.buscarUsuarioPorId(usuarioId);
-    if (!usuario) {
+
+    const connection = await connectDB();
+
+    // Verificar que el usuario existe
+    const [usuarios] = await connection.execute(
+      'SELECT id FROM usuarios WHERE id = ?',
+      [usuarioId]
+    );
+
+    if (usuarios.length === 0) {
+      await connection.end();
       return res.status(400).json({
         mensaje: 'Usuario no encontrado'
       });
     }
 
-   
-    await memoryStore.crearGasto(nuevoGasto);
+    // Insertar el gasto en la base de datos
+    await connection.execute(
+      `INSERT INTO gastos (id, usuario_id, monto, categoria, descripcion, fecha, fecha_creacion)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        nuevoGasto.id,
+        nuevoGasto.usuarioId,
+        nuevoGasto.monto,
+        nuevoGasto.categoria,
+        nuevoGasto.descripcion,
+        nuevoGasto.fecha,
+        nuevoGasto.fechaCreacion
+      ]
+    );
 
+    await connection.end();
     res.status(201).json(nuevoGasto.toJSON());
 
   } catch (error) {

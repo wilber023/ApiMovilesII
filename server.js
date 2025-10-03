@@ -47,9 +47,7 @@ app.get('/', (req, res) => {
       categorias: 'GET /api/gastos/categorias',
       resumen: 'GET /api/gastos/usuario/{id}/resumen'
     },
-    nota: ' Datos persistentes en MySQL',
-    ejemploCurl: 'curl -X POST http://localhost:3000/api/usuarios/registro -H "Content-Type: application/json" -d "{\"nombre\":\"Juan\",\"nombreUsuario\":\"juan123\",\"correoElectronico\":\"juan@test.com\",\"contrasena\":\"123456\"}"'
-  });
+    nota: ' Datos persistentes en MySQL',  });
 });
 
 app.use((err, req, res, next) => {
