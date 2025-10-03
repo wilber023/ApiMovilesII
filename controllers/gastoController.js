@@ -37,8 +37,6 @@ exports.obtenerGastosPorUsuario = async (req, res) => {
  
 exports.crearGasto = async (req, res) => {
   try {
-    console.log('📝 Datos recibidos para crear gasto:', req.body);
-    
     const { usuarioId, monto, categoria, descripcion, fecha } = req.body;
 
     const nuevoGasto = new Gasto({
@@ -49,64 +47,30 @@ exports.crearGasto = async (req, res) => {
       fecha: fecha ? new Date(fecha) : new Date()
     });
 
-    console.log('💰 Gasto creado en memoria:', nuevoGasto.toJSON());
-
-    // Validar los datos del gasto
+  
     const erroresValidacion = nuevoGasto.validar();
     if (erroresValidacion.length > 0) {
-      console.log('❌ Errores de validación:', erroresValidacion);
       return res.status(400).json({
         mensaje: erroresValidacion.join(', ')
       });
     }
-
-    console.log('✅ Validación pasada, conectando a BD...');
-    const connection = await connectDB();
-
-    // Verificar que el usuario existe
-    console.log('🔍 Verificando usuario con ID:', usuarioId);
-    const [usuarios] = await connection.execute(
-      'SELECT id FROM usuarios WHERE id = ?',
-      [usuarioId]
-    );
-
-    if (usuarios.length === 0) {
-      console.log('❌ Usuario no encontrado en BD');
-      await connection.end();
+ 
+    const usuario = await memoryStore.buscarUsuarioPorId(usuarioId);
+    if (!usuario) {
       return res.status(400).json({
         mensaje: 'Usuario no encontrado'
       });
     }
 
-    console.log('✅ Usuario encontrado, insertando gasto...');
+   
+    await memoryStore.crearGasto(nuevoGasto);
 
-    // Insertar el gasto en la base de datos
-    const result = await connection.execute(
-      `INSERT INTO gastos (id, usuario_id, monto, categoria, descripcion, fecha, fecha_creacion)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        nuevoGasto.id,
-        nuevoGasto.usuarioId,
-        nuevoGasto.monto,
-        nuevoGasto.categoria,
-        nuevoGasto.descripcion,
-        nuevoGasto.fecha,
-        nuevoGasto.fechaCreacion
-      ]
-    );
-
-    console.log('✅ Gasto insertado exitosamente. Resultado:', result[0]);
-    await connection.end();
-    
-    console.log('📤 Enviando respuesta:', nuevoGasto.toJSON());
     res.status(201).json(nuevoGasto.toJSON());
 
   } catch (error) {
-    console.error('💥 Error completo al crear gasto:', error);
-    console.error('Stack trace:', error.stack);
+    console.error('Error al crear gasto:', error);
     res.status(500).json({
-      mensaje: 'Error interno del servidor',
-      detalleError: error.message
+      mensaje: 'Error interno del servidor'
     });
   }
 };
