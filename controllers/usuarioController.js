@@ -166,3 +166,37 @@ exports.obtenerUsuario = async (req, res) => {
     });
   }
 };
+
+// Obtener todos los usuarios (útil para pruebas)
+exports.obtenerTodosLosUsuarios = async (req, res) => {
+  try {
+    const connection = await connectDB();
+    const [usuarios] = await connection.execute(
+      'SELECT id, nombre, nombre_usuario, correo_electronico, fecha_registro, esta_activo FROM usuarios ORDER BY nombre'
+    );
+
+    const usuariosFormateados = usuarios.map(datosUsuario => {
+      const usuario = new Usuario({
+        id: datosUsuario.id,
+        nombre: datosUsuario.nombre,
+        nombreUsuario: datosUsuario.nombre_usuario,
+        correoElectronico: datosUsuario.correo_electronico,
+        fechaRegistro: datosUsuario.fecha_registro,
+        estaActivo: datosUsuario.esta_activo
+      });
+      return usuario.toJSON();
+    });
+
+    await connection.end();
+    res.status(200).json({
+      usuarios: usuariosFormateados,
+      total: usuariosFormateados.length
+    });
+
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({
+      mensaje: 'Error interno del servidor'
+    });
+  }
+};
